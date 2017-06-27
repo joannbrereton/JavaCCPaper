@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!--
+
+Ant file for Java CC Query demonstration.
+
+For instructions on how to install and invoke Ant, 
+see http://ant.apache.org.
+
+ant - to compile UQLParser and all dependent files.
+ant clean - to clean all the compiled files.
+
+Note:  In order to use the parserPreCompile step below,
+you will need Ant version 1.6 or greater.  As of 11/11/2003, this
+was available as a "beta" release.
+
+If you have Ant version 1.5.4, you should use the parserPreCompileUsingExec
+step in its place.
+
+JoAnn P. Brereton
+IBM Software Group
+
+-->
+
+<project name="JavaCCQuery" basedir="." default="All">
+
+<property name="SRC" value="src"/>
+<property name="BIN" value="bin"/>
+<property name="LIB" value="lib"/>
+<property name="JAR" value="parser.jar"/>
+<property name="DOC" value="doc"/>
+<property name="DOCFILE" value="UQL.html"/>
+<property name="PKGSRC" value="${SRC}\com\demo\stage2"/>
+<property name="JAVACC_HOME" value="c:/javacc-3.2" />
+<property name="JAVACC_EXEC" value="${JAVACC_HOME}/bin/javacc.bat"/>
+<property name="JAVACC_DOC"  value="${JAVACC_HOME}/bin/jjdoc.bat"/>
+<property name="DEBUG_PARSER" value="yes"/>
+<property name="ERROR_REPORTING" value="yes"/>
+<target name="All" depends="parserJar,bnfdoc"/>
+
+<target name="parserJar" depends="libDir,compileAllJava">
+  <jar jarfile="${LIB}/${JAR}"
+       basedir="${BIN}"
+       includes="**/*.class"
+  />
+</target>
+
+<target name="libDir">
+        <mkdir dir="${LIB}"/>
+</target>
+
+
+<target name="binDir">
+        <mkdir dir="${BIN}"/>
+</target>
+
+<target name="compileAllJava" depends="binDir,parserPreCompile">
+   <javac srcdir="${SRC}" destdir="${BIN}" optimize="on" debug="on"/>
+</target>
+
+<!-- 
+
+Use this version for Ant 1.6beta2 and beyond
+
+-->
+
+<target name="parserPreCompile" depends="javaSrcDir">
+<javacc 
+ target="${SRC}/UQLParser.jj" 
+ outputdirectory="${PKGSRC}"
+ javacchome="${JAVACC_HOME}" 
+ debugparser="true"
+/>
+</target>
+
+
+<!-- 
+
+Use this version for Ant 1.5.4
+
+-->
+<target name="parserPreCompileUsingExec" depends="javaSrcDir">
+        <exec executable="${JAVACC_EXEC}">
+                <arg value="-output_directory:${PKGSRC}"/>
+                <arg value="-debug_parser"/>
+                <arg value="${SRC}\UQLParser.jj"/>
+        </exec>
+</target>
+
+<target name="javaSrcDir" >
+        <mkdir dir="${PKGSRC}"/>
+</target>
+
+<target name="clean">
+        <patternset id="class.files">
+                <include name="**/*.class"/>
+        </patternset>
+        
+        <patternset id="java.files">
+                <include name="**/*.java"/>
+        </patternset>
+                               
+        <delete  file="${DOC}/${DOCFILE}"/>
+        <delete  file="${LIB}/${JAR}"/>
+        <delete>
+                <fileset dir="${BIN}">
+                        <patternset refid="class.files"/>
+                </fileset>
+                
+                <fileset dir="${SRC}">
+                        <patternset refid="java.files"/>
+                </fileset>
+        </delete>
+</target>
+
+
+<!-- 
+     This target generates a BNF description of our language using the jjdoc function.     
+  -->
+<target name="bnfdoc" depends="docDir">
+  <exec executable="${JAVACC_DOC}">
+          <arg value="-output_file:${DOC}/${DOCFILE}"/>
+          <arg value="-one_table:false"/>
+          <arg value="${SRC}\UQLParser.jj"/>
+  </exec>
+</target>
+
+<target name="docDir">
+        <mkdir dir="${DOC}"/>
+</target>
+
+<target name="scrub" depends="clean">
+  <delete dir="${DOC}"/>
+  <delete dir="${BIN}"/>
+  <delete dir="${LIB}"/>
+</target>
+
+</project>

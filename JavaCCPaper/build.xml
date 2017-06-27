@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+
+Ant file for Java CC Query demonstration.
+
+For instructions on how to install and invoke Ant, 
+see http://ant.apache.org.
+
+ant - to compile UQLParser and all dependent files.
+ant clean - to clean all the compiled files.
+
+JoAnn P. Brereton
+IBM Software Group
+
+-->
+
+<project name="JavaCCQuery" basedir="." default="All">
+
+<target name="All">
+  <ant antfile="stage1/build.xml" inheritAll="false"/>
+  <ant antfile="stage2/build.xml" inheritAll="false"/>
+</target>
+
+<target name="clean">
+  <ant antfile="stage1/build.xml" target="clean" inheritAll="false"/>
+  <ant antfile="stage2/build.xml" target="clean" inheritAll="false"/>
+</target>
+
+<target name="scrub">
+  <ant antfile="stage1/build.xml" target="scrub" inheritAll="false"/>
+  <ant antfile="stage2/build.xml" target="scrub" inheritAll="false"/>
+</target>
+
+</project>
